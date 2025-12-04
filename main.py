@@ -774,296 +774,403 @@
 
 
 
-# app.py
 import streamlit as st
-from datetime import datetime
 
-# -----------------------
-# Sahifa asosiy sozlamalari
-# -----------------------
+# ==================== SAHIFA SOZLAMALARI ====================
 st.set_page_config(
-    page_title="BQD Interaktiv Taqdimot",
-    page_icon="📋",
+    page_title="BQD — Bojxona Qiymat Deklaratsiyasi",
+    page_icon="🇺🇿",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# -----------------------
-# CSS: dizaynni chiroyli qilish
-# -----------------------
-st.markdown(
-    """
-    <style>
-    /* Global */
-    .stApp { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
-    .main-header { font-size: 2.4rem; font-weight: 800; color: #0f172a; text-align: center; margin-bottom: 0.25rem; }
-    .sub-header { color: #475569; text-align:center; margin-bottom: 1.2rem; font-size:1rem; }
-    .card { border-radius: 14px; padding: 18px; box-shadow: 0 6px 20px rgba(2,6,23,0.06); margin-bottom: 12px; background: linear-gradient(180deg, #ffffffef, #fbfdff); }
-    .info-title { font-weight:700; font-size:1.05rem; margin-bottom:6px; color:#0f172a; }
-    .small-muted { color:#64748b; font-size:0.9rem; }
-    .formula { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, "Roboto Mono", monospace; background:#f8fafc; padding:10px;border-radius:8px; text-align:center; }
-    .footer { color:#94a3b8; text-align:center; padding:18px; font-size:0.9rem; }
-    .graf-label { font-weight:700; color:#0b61ff; }
-    .example { font-style:italic; color:#475569; }
-    /* Buttons */
-    .nav-btn { width:100%; padding:10px 14px; border-radius:10px; border:none; cursor:pointer; font-weight:600; }
-    /* Responsive columns */
-    @media (max-width: 900px) {
-        .stApp .block-container { padding-left:1rem; padding-right:1rem; }
+# ==================== ZAMONAVIY CSS ====================
+st.markdown("""
+<style>
+    .main-title {
+        font-size: 3.2rem;
+        font-weight: 800;
+        background: linear-gradient(90deg, #1e40af, #7c3aed);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        text-align: center;
+        margin-bottom: 0.5rem;
     }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
+    .subtitle {
+        font-size: 1.4rem;
+        color: #64748b;
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    .card {
+        padding: 1.8rem;
+        border-radius: 16px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        margin-bottom: 1.5rem;
+        border-left: 6px solid;
+    }
+    .card-blue   { background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border-left-color: #3b82f6; }
+    .card-green  { background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%); border-left-color: #22c55e; }
+    .card-purple { background: linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%); border-left-color: #a855f7; }
+    .card-orange { background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%); border-left-color: #f97316; }
+    .card-red    { background: linear-gradient(135deg, #fef2f2 0%, #fecaca 100%); border-left-color: #ef4444; }
+    .card-yellow { background: linear-gradient(135deg, #fefce8 0%, #fef9c3 100%); border-left-color: #eab308; }
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 2rem 0 1rem 0;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    .formula-box {
+        background: #1e293b;
+        color: #60a5fa;
+        padding: 1.5rem;
+        border-radius: 12px;
+        font-family: 'Courier New', monospace;
+        font-size: 1.3rem;
+        text-align: center;
+        font-weight: bold;
+        margin: 2rem 0;
+    }
+    .footer {
+        text-align: center;
+        padding: 3rem 1rem;
+        background: #0f172a;
+        color: #e2e8f0;
+        margin-top: 4rem;
+        border-radius: 16px;
+    }
+</style>
+""", unsafe_allow_html=True)
 
-# -----------------------
-# Manbalar (foydalanuvchiga ko'rsatiladi)
-# (Webdan olinadigan asosiy yo'riqnomalar / hujjatlar)
-# -----------------------
-st.sidebar.markdown("### 📚 Manbalar")
-st.sidebar.markdown(
-    """
-- Yo'riqnoma: *Tovarning bojxona qiymatini aniqlash tartibi* (Davlat bojxona qo'mitasi). :contentReference[oaicite:1]{index=1}  
-- Bojxona kodeksi (moddalar 303–313). :contentReference[oaicite:2]{index=2}  
-- Qo'shimcha qarorlar va 4-usul/6-usul haqida izohlar. :contentReference[oaicite:3]{index=3}
-"""
-)
+# ==================== SIDEBAR NAVIGATSIYA ====================
+st.sidebar.title("🇺🇿 BQD Taqdimoti")
+st.sidebar.markdown("**Bojxona Qiymat Deklaratsiyasi**")
+st.sidebar.markdown("---")
 
-# -----------------------
-# Sahifa slaydlari (strukturani defolt jadval bilan)
-# -----------------------
 slides = [
-    "🏠 Kirish",
-    "📋 BQD haqida qisqacha",
-    "📑 Grafalar (1–23) — Toʻliq tushuntirish",
-    "💡 Muhim qoidalar va misollar",
-    "📎 Hujjatlar va isbotlovchi ma'lumotlar",
-    "⚠️ Xatoliklar va tavsiyalar",
-    "✅ Xulosa"
+    "Kirish",
+    "BQD Turlari",
+    "Taqdim Shakllari",
+    "BQD-1 (1-usul) – Batafsil",
+    "BQD-1 Muhim Grafalar",
+    "BQD-2 (2-6 usullar)",
+    "Kerakli Hujjatlar",
+    "Muhim Eslatmalar",
+    "Video Qo‘llanma",
+    "Xulosa"
 ]
 
-if "slide_index" not in st.session_state:
-    st.session_state.slide_index = 0
+icons = ["🏠", "📊", "💻", "📝", "⚠️", "📋", "📎", "⚡", "🎥", "✅"]
+slide_dict = {f"{icon} {name}": name for icon, name in zip(icons, slides)}
 
-# Side navigation (radio)
-selected = st.sidebar.radio("Bo'lim tanlang:", slides, index=st.session_state.slide_index)
-st.session_state.slide_index = slides.index(selected)
+current_slide = st.sidebar.radio("Bo‘limni tanlang:", list(slide_dict.keys()))
 
-# Top header
-st.markdown(f"<div class='main-header'>📋 Bojxona Qiymat Deklaratsiyasi — Interaktiv Qo'llanma</div>", unsafe_allow_html=True)
-st.markdown(f"<div class='sub-header'>Sizning qo'llanmalaringiz uchun to'liq izoh: grafalar, misollar, hujjatlar va tez-tez uchraydigan xatolar</div>", unsafe_allow_html=True)
-st.markdown("---")
+# ==================== ASOSIY KONTENT ====================
+title = slide_dict[current_slide]
 
-# -----------------------
-# Helper funksiyalar
-# -----------------------
-def nav_buttons():
-    cols = st.columns([1, 2, 1])
-    with cols[0]:
-        if st.button("⬅️ Oldingi"):
-            idx = st.session_state.slide_index - 1
-            if idx >= 0:
-                st.session_state.slide_index = idx
-                st.experimental_rerun()
-    with cols[1]:
-        st.write(f"Sahifa {st.session_state.slide_index+1} / {len(slides)}")
-    with cols[2]:
-        if st.button("Keyingi ➡️"):
-            idx = st.session_state.slide_index + 1
-            if idx < len(slides):
-                st.session_state.slide_index = idx
-                st.experimental_rerun()
+if title == "Kirish":
+    st.markdown('<h1 class="main-title">Bojxona Qiymat Deklaratsiyasi (BQD)</h1>', unsafe_allow_html=True)
+    st.markdown('<p class="subtitle">O‘zbekiston Respublikasi bojxona hududiga olib kiriladigan tovarlar uchun majburiy hujjat</p>', unsafe_allow_html=True)
 
-# -----------------------
-# Kontent bo'limlari
-# -----------------------
-if selected == "🏠 Kirish":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<div class='info-title'>BQD nima va uning ahamiyati</div>", unsafe_allow_html=True)
+    col1, col2, col3 = st.columns([1,2,1])
+    with col2:
+        st.image("https://upload.wikimedia.org/wikipedia/commons/9/9f/Flag_of_Uzbekistan.png", width=150)
+    
     st.markdown("""
-- BQD (Bojxona qiymat deklaratsiyasi) — bojxona yuk deklaratsiyasining ajralmas qismi bo'lib, tovarning bojxona qiymati haqidagi ma'lumotlarni o'z ichiga oladi. Bu ma'lumot deklarant yoki broker tomonidan BYD bilan birga topshiriladi. :contentReference[oaicite:4]{index=4}
-- Bojxona qiymatini aniqlashda xalqaro qoidalar va mahalliy yo'riqnomalar (yo'riqnoma, Vazirlar Mahkamasi qarorlari) asos qilib olinadi. :contentReference[oaicite:5]{index=5}
-""")
-    st.markdown("<div class='small-muted'>Taqdimot oxirida siz har bir grafa uchun to'liq izoh va qanday hujjatlar kerakligi bilan tanishasiz.</div>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("---")
-    nav_buttons()
-
-elif selected == "📋 BQD haqida qisqacha":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<div class='info-title'>Usullar ierarxiyasi (1 → 6)</div>", unsafe_allow_html=True)
-    st.markdown("""
-1. **1-usul (bitim qiymati)** — asosiy usul, sotuvchi va xaridor o'rtasidagi to'g'ridan-to'g'ri bitim narxi asosida (uyg'un shartlar bilan).  
-2. **2-usul (aynan bir xil tovar)** — agar 1-usulni qo'llab bo'lmasa, so'nggi 90 kun ichida olib kirilgan aynan bir xil tovar bitimlari.  
-3. **3-usul (o'xshash tovar)** — xususiyatlari va sifati o'xshash tovarlar.  
-4. **4-usul (ichki bozor narxi/chegirish)** — mamlakat ichidagi sotish narxi va kerakli tuzatishlar.  
-5. **5-usul (qo'shish/hisoblangan qiymat)** — ishlab chiqarish asosida hisoblangan qiymat.  
-6. **6-usul (zaxira)** — yuqoridagi usullardan birortasi ishlamagan taqdirda qo'llaniladigan zaxira mexanizmi.  
-    """)
-    st.markdown("<div class='small-muted'>Mazkur ierarxiya O'zbekiston hududida bojxona qiymatini aniqlashda qo'llaniladigan asosiy tamoyildir. :contentReference[oaicite:6]{index=6}</div>", unsafe_allow_html=True)
-    st.markdown("</div> ", unsafe_allow_html=True)
-
-    st.markdown("---")
-    nav_buttons()
-
-elif selected == "📑 Grafalar (1–23) — Toʻliq tushuntirish":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<div class='info-title'>Grafalar bo'yicha interaktiv izoh</div>", unsafe_allow_html=True)
-
-    st.markdown("Quyida BQDdagi eng ko'p ishlatiladigan grafalar — har biri uchun: maqsad, talab qilinadigan ma'lumot va misol keltirilgan.")
-    st.markdown("**E'tibor:** aniq rasmiy talablarga yo'riqnoma va qarorlarga murojaat qiling. :contentReference[oaicite:7]{index=7}")
-
-    # We'll render each grafa as expander for clarity
-    with st.expander("1. Grafa — Tashuvchi/kontrakt raqami va sana", expanded=False):
-        st.markdown("**Maqsad:** Kontrakt yoki BYD bilan bog'langan identifikatorni ko'rsatish.")
-        st.markdown("**Nima kiritiladi:** Tashqi savdo kontrakti (ID), invoys raqami, sana.")
-        st.markdown("**Misol:** `INV-2025-0456, 2025-11-02`")
-        st.markdown("**Ogohlantirish:** Sana va raqamlar TEDAAT tizimidagi hujjatlar bilan mos bo'lishi kerak.")
-
-    with st.expander("2. Grafa — Yetkazib berish shartlari (INCOTERMS)", expanded=False):
-        st.markdown("**Maqsad:** Tashish shartlari (EXW, FOB, CIF va h.k.) bojxona qiymatini aniqlashda muhim rol o'ynaydi.")
-        st.markdown("**Ta'siri:** Masalan, CIF — narxga sug'urta va navlun kiritilgan bo'ladi; EXW — yetkazib berish xarajatlari alohida qo'shilishi kerak.")
-        st.markdown("**Qoida:** BYD dagi INCOTERMS bilan BQDdagi 3-grafa mosligini tekshiring. :contentReference[oaicite:8]{index=8}")
-
-    with st.expander("3. Grafa — Bitim qiymati (11a-grafa kabi)", expanded=False):
-        st.markdown("**Maqsad:** 1-usul bo'yicha bitim narxini kiritish (kontrakt bo'yicha).")
-        st.markdown("**Nima kiritiladi:** Kontrakt narxi valyutada, mahalliy valyutada va kurs.")
-        st.markdown("**Misol:** `1000 USD` → Markaziy bank kursi bo'yicha so‘zlanadi.")
-        st.markdown("**Qoidalar:** Agar bitim shartlari o'zaro bog'liq tomonlarga taalluqli bo'lsa, 1-usul qo'llanmasligi mumkin. :contentReference[oaicite:9]{index=9}")
-
-    with st.expander("4. Grafa — Bilvosita to'lovlar (11b va 12 grafa)", expanded=False):
-        st.markdown("**Maqsad:** Tovar qiymatiga qo'shilishi kerak bo'lgan uchinchi shaxslarga to'lovlar (misol: litsenziya, komissiya).")
-        st.markdown("**Nima kiritiladi:** Toʻlov summalari va asos (kontrakt bo'yicha yoki qo'shimcha hujjatlar).")
-        st.markdown("**Misol:** `Litsenziya to'lovi: 50 USD`")
-
-    with st.expander("5. Grafa — Soliqlar va bojxona to'lovlari asoslari", expanded=False):
-        st.markdown("**Maqsad:** Bojxona qiymatini ta'sir qiluvchi mahalliy soliqlar (ba'zi hollarda chegirish/kiritish talab qilinadi).")
-        st.markdown("**Nima kiritiladi:** To‘lanishi yoki chetlatilishi kerak bo‘lgan soliqlar ro'yxati va summasi.")
-
-    with st.expander("6. Grafa — Qo'shimcha xarajatlar (transport, sug'urta, yuklash)", expanded=False):
-        st.markdown("**Maqsad:** Bitim narxiga kiritilmagan, ammo bojxona qiymatiga qo‘shilishi kerak bo‘lgan xarajatlar.")
-        st.markdown("**Nima kiritiladi:** Tashish, sug'urta, yuklash/tushirish summalari va hujjat manbalari.")
-        st.markdown("**Eslatma:** Har bir element uchun hujjat (invoys, bill of lading, insurance policy) talab qilinadi.")
-
-    with st.expander("7. Grafa — Bog'liqlik (7a/7b)", expanded=False):
-        st.markdown("**Maqsad:** Sotuvchi va xaridor orasidagi bog'liqlik (affiliated parties) aniqlash.")
-        st.markdown("**Ta'siri:** Agar bog'liqlik aniqlansa va narxga ta'sir qilgan bo'lsa — 1-usul qo'llanilmaydi va boshqa usullarga o'tiladi. :contentReference[oaicite:10]{index=10}")
-
-    with st.expander("8. Grafa — Cheklovlar va shartnomalar", expanded=False):
-        st.markdown("**Maqsad:** Narxga cheklovlar (masalan, qaytarish shartlari), tovarni shartli sotish holatlari.")
-        st.markdown("**Ta'siri:** Shunday shartlar mavjud bo'lsa, 1-usul qoidalaridan voz kechish zarur.")
-
-    # Continue for other grafalar up to 23 with concise explanations:
-    grafalar = {
-        9: ("Intellektual mulk to'lovlari (9a)", "Litsenziya, mualliflik haqi, patent va shu kabilar."),
-        10: ("Qayta sotishdan tushum (9b)", "Keyingi sotishdan olinadigan ulush va shartnoma bo'yicha tushumlar."),
-        11: ("Hisoblash formulalari", "BOJXONA QIYMATI = (12 + 18) - 22 kabi yakuniy formula."),
-        12: ("Qo'shimcha varaq va izohlar", "Hujjatlar ro'yxati va BYD raqami misollari."),
-        13: ("Tuzatishlar bo'limi (B bo'lim)", "Vositachilik haqlari, konteyner, o'rov, ishlab chiqarish xarajatlari."),
-        14: ("Yetkazib berish shartlari tafsiloti", "INCOTERMS farqlashlari va ularning hisoblashdagi ta'siri."),
-        15: ("Hisob-kitob misollari", "Amaliy misollar (1-usulga oid oddiy hisoblardan murakkab holatlarga qadar)."),
-        16: ("2-usul uchun maxsus grafalar", "Aynan bir xil tovar BYD raqamlari va 90 kun qoidasi."),
-        17: ("3-usul uchun xususiy talablar", "O'xshash tovarlar, xususiyat va sifat mosligi."),
-        18: ("4-usul — chegirish usuli tafsiloti", "Ichki bozordagi narxni chegirib hisoblash qoidalari. :contentReference[oaicite:11]{index=11}"),
-        19: ("5-usul — qo'shish (hisoblangan qiymat)", "Ishlab chiqarish xarajatlari, umumiy xarajatlar va odatiy foyda."),
-        20: ("6-usul — zaxira", "Yuqoridagi usullar yetarli bo'lmaganda tatbiq etiladi."),
-        21: ("Qayerga ilova qilish kerak", "Hujjatlarni qanday tartibda yig'ish va elektron tizimda joylashtirish."),
-        22: ("Imzo, sana, va tasdiq", "ERI va muhr talablari; BYD bilan bir vaqtda topshirish majburiyati. :contentReference[oaicite:12]{index=12}"),
-        23: ("Yakuni — Bojxona qiymati (23a)", "Hisoblangan bojxona qiymati va unga asoslangan to'lovlar.")
-    }
-
-    for k, v in grafalar.items():
-        title, desc = v
-        with st.expander(f"{k}. {title}", expanded=False):
-            st.markdown(f"**Izoh:** {desc}")
-            # Add an example area for each grafa
-            st.markdown("**Misol:**")
-            if k in (11, 23):
-                st.markdown("<div class='formula'>BOJXONA QIYMATI = (12 + 18) - 22</div>", unsafe_allow_html=True)
-            else:
-                st.markdown(f"<div class='example'>Tegishli ma'lumotni shu yerga yozing (grafa {k})</div>", unsafe_allow_html=True)
-
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("---")
-    nav_buttons()
-
-elif selected == "💡 Muhim qoidalar va misollar":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<div class='info-title'>Eng muhim amaliy qoidalar</div>", unsafe_allow_html=True)
-    st.markdown("""
-- **1-usulni faqat shartlar bajarilganda qo'llang** — agar sotuvchi va xaridor o'rtasida bog'liqlik, narx cheklovlari yoki boshqa ta'sir etuvchi omillar mavjud bo'lsa, 1-usul ishlatilmaydi. :contentReference[oaicite:13]{index=13}  
-- **90 kun qoidasi (2/3-usullar uchun)** — aynan bir xil yoki o'xshash tovar bo'yicha ma'lumotlar so'nggi 90 kun ichida olinishi kerak. :contentReference[oaicite:14]{index=14}  
-- **Hujjatlar asosiy dalil** — sug'urta polisisi, tashish hujjatlari, invoys va TEDAAT kontraktlari bojxona qiymatini tasdiqlashda muhim rol o'ynaydi. :contentReference[oaicite:15]{index=15}
-""")
-    st.markdown("### Amaliy misol: FOB kontrakt → Bojxona qiymatini qanday hisoblash")
-    st.markdown("1) Kontrakt narxini (FOB) oling. 2) FOB ga navlun va sug'urta qo'shing (agar kontrakt narxiga kiritilmagan bo'lsa). 3) Valyuta kursiga ko'ra milliy valyutaga o'tkazing. 4) Tuzatishlar (komissiya, litsenziya) qo'shing. 5) Yakuniy summa 23-grafa.")
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("---")
-    nav_buttons()
-
-elif selected == "📎 Hujjatlar va isbotlovchi ma'lumotlar":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<div class='info-title'>Asosiy hujjatlar ro'yxati</div>", unsafe_allow_html=True)
-    st.markdown("""
-**1-usul uchun majburiy:**
-- Tashqi savdo kontrakti (TEDAAT ID), invoys, tashish hujjatlari (B/L yoki CMR), sug'urta polisisi, bank to'lov hujjatlari. :contentReference[oaicite:16]{index=16}
-
-**2/3-usullar uchun qo'shimcha:**
-- Oldingi BYD raqamlari (90 kun ichida), taqqoslovchi invoyslar, transport xarajatlarini tasdiqlovchi hujjatlar. :contentReference[oaicite:17]{index=17}
-
-**4/5-usullar uchun:**
-- O'zbekiston ichidagi sotuv hujjatlari (4-usul), ishlab chiqaruvchining buxgalteriya hisoboti va ishlab chiqarish kalkulyatsiyalari (5-usul). :contentReference[oaicite:18]{index=18}
-""")
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("---")
-    nav_buttons()
-
-elif selected == "⚠️ Xatoliklar va tavsiyalar":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<div class='info-title'>Tez-tez uchraydigan xatolar</div>", unsafe_allow_html=True)
-    st.error("""
-- 1-usulni noto'g'ri qo'llash (bog'liqlik e'tiborga olinmagan).  
-- Tuzatishlar (transport, sug'urta) unutilgan.  
-- Valyuta kursi noto'g'ri qo'llanilgan.  
-- Hujjatlar to'liq emas yoki mos kelmaydi.  
-- Grafalarni noto'g'ri to'ldirish yoki BYD bilan mos kelmaslik.
-""")
-    st.markdown("### Tavsiya:")
-    st.markdown("""
-1. Hujjatlarni oldindan to'plang.  
-2. Har bir grafa uchun manbani (hujjat) yozib qo'ying.  
-3. Elektron raqamli imzo (ERI) bilan tasdiqlashni tekshiring.  
-4. Shubhali holatda bojxona organi yoki vakolatli brokerga murojaat qiling.
-""")
-    st.markdown("</div>", unsafe_allow_html=True)
-    st.markdown("---")
-    nav_buttons()
-
-elif selected == "✅ Xulosa":
-    st.markdown("<div class='card'>", unsafe_allow_html=True)
-    st.markdown("<div class='info-title'>Xulosa va Qo'llanma</div>", unsafe_allow_html=True)
-    st.markdown("""
-- BQD — bojxona rasmiylashtiruvi uchun hal qiluvchi hujjat; har bir grafa to'liq va aniq to'ldirilishi lozim. :contentReference[oaicite:19]{index=19}  
-- Asosiy manbalar: Yo'riqnoma, Bojxona kodeksi va Vazirlar Mahkamasi qarorlari. :contentReference[oaicite:20]{index=20}
-""")
-    st.markdown("<div class='small-muted'>So'nggi yangilanish: avvalgi rasmiy yo'riqnomalar va qarorlarni tekshiring. (lex.uz saytida rasmiy matnlar mavjud.)</div>", unsafe_allow_html=True)
-    st.markdown("</div>", unsafe_allow_html=True)
-
-    st.markdown("---")
-    nav_buttons()
-
-# FOOTER
-st.markdown(
-    f"""
-    <div class='footer'>
-        <div><strong>BQD Interaktiv — {datetime.now().year}</strong></div>
-        <div class='small-muted'>Rasmiy hujjatlar va yo'riqnomalarni lex.uz saytidan tekshiring. (Yo'riqnoma / qarorlar havolalari sidebarda keltirilgan.)</div>
+    <div class="card card-blue">
+        <h3>📖 BQD nima?</h3>
+        <p><strong>Bojxona Qiymat Deklaratsiyasi (BQD)</strong> — Bojxona yuk deklaratsiyasining (BYD) ajralmas qismi bo‘lib, 
+        tovarning bojxona qiymati to‘g‘risidagi to‘liq ma’lumotlarni o‘z ichiga oladi. Deklarant yoki bojxona brokeri tomonidan 
+        BYD bilan bir vaqtda bojxona organiga taqdim etiladi.</p>
+        <p><strong>Qonuniy asos:</strong> O‘zbekiston Respublikasi Bojxona kodeksining <strong>303–313-moddalari</strong></p>
     </div>
-    """,
-    unsafe_allow_html=True,
-)
+    """, unsafe_allow_html=True)
 
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown('<div class="card card-green"><h4>📄 BQD-1</h4><p>1-usul (bitim qiymati) uchun<br><strong>90%+ hollarda qo‘llaniladi</strong></p></div>', unsafe_allow_html=True)
+    with col2:
+        st.markdown('<div class="card card-purple"><h4>📋 BQD-2</h4><p>2–6 usullar uchun<br>1-usul qo‘llab bo‘lmaganda</p></div>', unsafe_allow_html=True)
 
+elif title == "BQD Turlari":
+    st.markdown('<h1 class="main-title">BQD Turlari va Qo‘llanilishi</h1>', unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="card card-green">
+        <h3>1-usul – Bitim qiymati (BQD-1)</h3>
+        <ul>
+            <li>Eng keng tarqalgan usul (90%+)</li>
+            <li>Sotuvchi va xaridor o‘rtasida haqiqiy savdo bitimi mavjud</li>
+            <li>Narx hujjatlar bilan tasdiqlangan</li>
+            <li>Hech qanday cheklov va o‘zaro bog‘liqlik ta’sir qilmagan</li>
+        </ul>
+    </div>
+    
+    <div class="card card-purple">
+        <h3>2–6 usullar (BQD-2)</h3>
+        <p>1-usul qo‘llab bo‘lmaganda ketma-ketlikda qo‘llaniladi:</p>
+        <div style="columns: 2;">
+            <li>2-usul → Aynan bir xil tovar</li>
+            <li>3-usul → O‘xshash tovar</li>
+            <li>4-usul → Chegirish usuli</li>
+            <li>5-usul → Qo‘shish usuli</li>
+            <li>6-usul → Zaxira usul</li>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
+elif title == "Taqdim Shakllari":
+    st.markdown('<h1 class="main-title">Taqdim Etish Shakllari</h1>', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div class="card card-blue">
+            <h3>📱 Elektron shakl (afzal)</h3>
+            <ul>
+                <li>TEDAAT orqali</li>
+                <li>ERI (elektron raqamli imzo) bilan</li>
+                <li>Tez, xatosiz, arxivlanadi</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="card card-orange">
+            <h3>📄 Qog‘oz shakl</h3>
+            <ul>
+                <li>A4 formatda 4 nusxa</li>
+                <li>Imzo + muhr</li>
+                <li>Elektron nusxa ham ERI bilan</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
 
+elif title == "BQD-1 (1-usul) – Batafsil":
+    st.markdown('<h1 class="main-title">BQD-1 To‘ldirish – Batafsil Tushuntirish</h1>', unsafe_allow_html=True)
+    st.markdown("<p class='subtitle'>Har bir grafa rasmiy talablar asosida tushuntirilgan</p>", unsafe_allow_html=True)
+
+    with st.expander("A BO‘LIM – Hisoblash uchun asos (11–12-grafalar)", expanded=True):
+        st.markdown("""
+        <div class="card card-blue">
+            <strong>11a-grafa</strong> → Bitim narxi (invoys bo‘yicha)<br>
+            &nbsp;&nbsp;• 1-qator: kontrakt valyutasida<br>
+            &nbsp;&nbsp;• 2-qator: so‘mda (Markaziy bank kursi bo‘yicha)<br>
+            &nbsp;&nbsp;• 3-qator: qo‘llanilgan kurs<br><br>
+            <strong>11b-grafa</strong> → Bilvosita to‘lovlar (royalti, litsenziya, vositachilik va h.k.)<br><br>
+            <strong>12-grafa</strong> → Jami A bo‘lim = 11a + 11b
+        </div>
+        """, unsafe_allow_html=True)
+
+    with st.expander("B BO‘LIM – Qo‘shimcha hisoblar (+)", expanded=True):
+        st.markdown("""
+        <div class="card card-green">
+            <strong>13–17 grafalar</strong> → Bojxona qiymatiga qo‘shiladigan xarajatlar:<br>
+            • 13a – vositachilik haqi<br>
+            • 14 – konteyner va o‘rov<br>
+            • 15 – mualliflik, litsenziya to‘lovlari<br>
+            • 16 – qayta sotishdan sotuvchiga tushadigan daromad<br>
+            • 17a – tashish, 17b – yuklash/tushirish, 17v – sug‘urta<br><br>
+            <strong>18-grafa</strong> → B bo‘lim yig‘indisi
+        </div>
+        """, unsafe_allow_html=True)
+
+    with st.expander("V BO‘LIM – Chegirmalar (–)", expanded=True):
+        st.markdown("""
+        <div class="card card-red">
+            <strong>19–22 grafalar</strong> → O‘zbekistonda yuzaga kelgan xarajatlar:<br>
+            • 19 – qurilish, montaj<br>
+            • 20 – O‘zbekiston ichidagi transport<br>
+            • 21 – bojxona to‘lovlari va soliqlar<br>
+            • 22 – V bo‘lim yig‘indisi
+        </div>
+        """, unsafe_allow_html=True)
+
+    st.markdown("""
+    <div class="formula-box">
+        BOJXONA QIYMATI = (12-grafa + 18-grafa) − 22-grafa<br>
+        → Bu qiymat 23a-grafada ko‘rsatiladi
+    </div>
+    """, unsafe_allow_html=True)
+
+elif title == "BQD-1 Muhim Grafalar":
+    st.markdown('<h1 class="main-title">Eng Muhim va "Xavfli" Grafalar</h1>', unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown("""
+        <div class="card card-red">
+            <h4>7a-7b grafalar – O‘zaro bog‘liqlik</h4>
+            <p>Agar "HA" bo‘lsa va bog‘liqlik narxga ta’sir qilgan bo‘lsa → <strong>1-usul qo‘llanilmaydi!</strong></p>
+        </div>
+        <div class="card card-yellow">
+            <h4>8a-8b grafalar – Cheklovlar</h4>
+            <p>Narxga ta’sir etuvchi cheklovlar bo‘lsa → 1-usul yo‘q!</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col2:
+        st.markdown("""
+        <div class="card card-purple">
+            <h4>9a-grafa – Intellektual mulk to‘lovlari</h4>
+            <p>Litsenziya, royalti, patent, savdo belgisi uchun to‘lovlar → majburiy qo‘shiladi</p>
+        </div>
+        <div class="card card-orange">
+            <h4>3-grafa – Yetkazib berish shartlari (INCOTERMS)</h4>
+            <p>EXW, FCA, FOB, CIF, CIP va boshqalar → to‘g‘ri ko‘rsatilmasa katta xato!</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+elif title == "BQD-2 (2-6 usullar)":
+    st.markdown('<h1 class="main-title">BQD-2 – 2-6 usullar batafsil</h1>', unsafe_allow_html=True)
+    
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["2-usul", "3-usul", "4-usul", "5-usul", "6-usul"])
+    
+    with tab1:
+        st.markdown("""
+        <div class="card card-blue">
+            <h3>2-usul: Aynan bir xil tovar bitimi</h3>
+            <p>So‘nggi 90 kun ichida olib kirilgan, bojxona tomonidan qabul qilingan, aynan bir xil tovarning narxi asos qilib olinadi.</p>
+            <p><strong>Muhim:</strong> miqdor, tijorat shartlari, transport xarajatlari bo‘yicha tuzatishlar kiritiladi.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with tab2:
+        st.markdown("""
+        <div class="card card-green">
+            <h3>3-usul: O‘xshash tovar bitimi</h3>
+            <p>2-usul bilan deyarli bir xil, faqat “aynan bir xil” o‘rniga “o‘xshash” tovar ishlatiladi.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with tab3:
+        st.markdown("""
+        <div class="card card-orange">
+            <h3>4-usul: Chegirish usuli</h3>
+            <p>O‘zbekistonda sotilgan narxdan vositachilik, soliq, ichki transport xarajatlari chegirib tashlanadi.</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with tab4:
+        st.markdown("""
+        <div class="card card-red">
+            <h3>5-usul: Qo‘shish usuli (hisoblangan qiymat)</h3>
+            <p>Ishlab chiqaruvchi xarajatlari + odatdagi foyda + transport = bojxona qiymati</p>
+            <p><strong>Talab:</strong> ishlab chiqaruvchining buxgalteriya hujjatlari</p>
+        </div>
+        """, unsafe_allow_html=True)
+    
+    with tab5:
+        st.markdown("""
+        <div class="card card-purple">
+            <h3>6-usul: Zaxira usul</h3>
+            <p>Yuqoridagi 5 usulning hech biri qo‘llanmasa → bojxona xodimi professional mulohaza yuritadi (lekin 1-5 usullarga zid bo‘lmasligi kerak).</p>
+        </div>
+        """, unsafe_allow_html=True)
+
+elif title == "Kerakli Hujjatlar":
+    st.markdown('<h1 class="main-title">Taqdim etilishi kerak bo‘lgan hujjatlar</h1>', unsafe_allow_html=True)
+    
+    tabs = st.tabs(["1-usul", "2-3 usullar", "4-usul", "5-usul"])
+    with tabs[0]:
+        st.markdown("""
+        <div class="card card-blue">
+            <h4>Majburiy:</h4>
+            <li>Tashqi savdo kontrakti (TEDAAT ID)</li>
+            <li>Invoys (hisob-faktura)</li>
+            <h4>Qo'shimcha (zarur bo‘lganda):</h4>
+            <li>Sug‘urta polisi</li>
+            <li>Transport shartnomasi va hujjatlar</li>
+            <li>Litsenzion kelishuv</li>
+            <li>Bank to‘lov hujjatlari</li>
+        </div>
+        """, unsafe_allow_html=True)
+
+elif title == "Muhim Eslatmalar":
+    st.markdown('<h1 class="main-title">Eng muhim eslatmalar</h1>', unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="card card-red">
+        <h4>Qat'iy talablar</h4>
+        <li>O‘chirish, bo‘yash bo‘lmasligi kerak</li>
+        <li>Barcha summalar milliy valyutada</li>
+        <li>ERI bilan tasdiqlanishi shart</li>
+        <li>Hujjatlar rus yoki ingliz tilida (boshqa tillarda – tarjima bilan)</li>
+    </div>
+    
+    <div class="card card-yellow">
+        <h4>Muddatlar</h4>
+        <li>2-4 usullar uchun → 90 kun</li>
+        <li>Muqobil manbalar → 180 kun</li>
+        <li>BYD bilan bir vaqtda taqdim etiladi</li>
+    </div>
+    """, unsafe_allow_html=True)
+
+elif title == "Video Qo‘llanma":
+    st.markdown('<h1 class="main-title">Video qo‘llanma</h1>', unsafe_allow_html=True)
+    st.video("https://www.youtube.com/watch?v=ke5_OKgJs_E")
+    st.markdown("""
+    <div class="card card-blue" style="text-align:center; padding:2rem;">
+        <h4>BQD-1 va BQD-2 ni to‘ldirish bo‘yicha batafsil video darslik</h4>
+        <p>Muallif: Bojxona xizmati xodimi, 2024-yil</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+elif title == "Xulosa":
+    st.markdown('<h1 class="main-title">Xulosa va tavsiyalar</h1>', unsafe_allow_html=True)
+    
+    st.markdown("""
+    <div class="card card-green">
+        <h3>Asosiy qoidalar</h3>
+        <li>Aniqlik – To‘liqlik – Hujjatlilik – Vaqtida taqdim etish</li>
+        <li>1-usul → 90%+ hollarda</li>
+        <li>Bog‘liqlik va cheklovlarni unutmaslik!</li>
+    </div>
+    
+    <div style="text-align:center; margin-top:3rem;">
+        <h2 style="color:#22c55e;">E’tiboringiz uchun katta rahmat!</h2>
+        <p>Savollar bo‘lsa – bojxona brokeri yoki yaqin bojxona bo‘limiga murojaat qiling</p>
+    </div>
+    """, unsafe_allow_html=True)
+
+# ==================== FOOTER ====================
+st.markdown("""
+<div class="footer">
+    <h3>Bojxona Qiymat Deklaratsiyasi (BQD) taqdimoti</h3>
+    <p>O‘zbekiston Respublikasi Bojxona kodeksi (303–313-moddalar) • 2025-yil yangilanishi</p>
+    <p><strong>Manba:</strong> <a href="https://lex.uz/docs/-3133231" style="color:#60a5fa;">lex.uz – O‘zbekiston Respublikasi qonunchiligi</a> | 
+    <a href="https://customs.uz" style="color:#60a5fa;">customs.uz</a></p>
+    <p style="font-size:0.9rem; margin-top:1rem;">So‘nggi yangilanish: 2025-yil dekabr</p>
+</div>
+""", unsafe_allow_html=True)
+
+# ==================== NAVIGATSIYA TUGMALARI ====================
+st.markdown("---")
+col_prev, col_info, col_next = st.columns([1, 2, 1])
+current_idx = slides.index(title)
+
+with col_prev:
+    if current_idx > 0:
+        if st.button("⬅️ Oldingi bo‘lim", use_container_width=True):
+            st.session_state.current = slides[current_idx - 1]
+            st.rerun()
+
+with col_info:
+    st.markdown(f"<p style='text-align:center; font-size:1.2rem; color:#64748b;'><strong>{current_idx + 1}</strong> / {len(slides)}</p>", unsafe_allow_html=True)
+
+with col_next:
+    if current_idx < len(slides) - 1:
+        if st.button("Keyingi bo‘lim ➡️", use_container_width=True):
+            st.session_state.current = slides[current_idx + 1]
+            st.rerun()
+
+# Sidebar qo‘shimcha maslahatlar
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("### Maslahatlar")
+    st.info("Hujjatlarni oldindan tayyorlang")
+    st.success("Grafalarni ketma-ket to‘ldiring")
+    st.warning("Valyuta kursini unutmeng")
+    st.error("Bog‘liqlik va cheklovlarni tekshiring")
