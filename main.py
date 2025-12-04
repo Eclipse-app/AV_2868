@@ -764,194 +764,366 @@
 
 
 
-
-
-
-
-
-
-
-
-
-
-# bojxona_qiymati_app.py
 import streamlit as st
-import pandas as pd
-from datetime import datetime
 
+# ==================== SAHIFA SOZLAMALARI ====================
 st.set_page_config(
-    page_title="🇺🇿 O‘zbekiston Bojxona Qiymati Kalkulyatori",
-    page_icon="🏛️",
-    layout="wide"
+    page_title="BQD – Bojxona Qiymat Deklaratsiyasi",
+    page_icon="🛃",
+    layout="wide",
+    initial_sidebar_state="expanded"
 )
 
-st.title("🇺🇿 O‘zbekiston Respublikasi Bojxona Kodeksi")
-st.markdown("### **44-bob. Tovarning bojxona qiymati** (YANGILANGAN – 2024 yil 28-maydan kuchga kirgan tahrir)")
-st.caption(f"Bugungi sana: {datetime.now().strftime('%d.%m.%Y')}")
+# ==================== CSS STILLARI ====================
+st.markdown("""
+<style>
+    .main-title {
+        font-size: 3rem;
+        font-weight: bold;
+        color: #1e40af;
+        text-align: center;
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .subtitle {
+        font-size: 1.4rem;
+        color: #475569;
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+    .info-box {padding: 1.5rem; border-radius: 12px; margin: 1rem 0; box-shadow: 0 4px 6px rgba(0,0,0,0.05);}
+    .blue-box {background-color: #eff6ff; border-left: 6px solid #3b82f6;}
+    .green-box {background-color: #f0fdf4; border-left: 6px solid #22c55e;}
+    .purple-box {background-color: #faf5ff; border-left: 6px solid #a855f7;}
+    .orange-box {background-color: #fff7ed; border-left: 6px solid #f97316;}
+    .red-box {background-color: #fef2f2; border-left: 6px solid #ef4444;}
+    .yellow-box {background-color: #fefce8; border-left: 6px solid #ca8a04;}
+    .section-title {font-size: 1.5rem; font-weight: bold; color: #1e293b; margin: 1.5rem 0 1rem;}
+    .formula {
+        font-family: monospace;
+        font-size: 1.3rem;
+        background: #f8fafc;
+        padding: 1.5rem;
+        border-radius: 10px;
+        text-align: center;
+        border: 2px solid #e2e8f0;
+        margin: 1.5rem 0;
+    }
+    .author {text-align: center; color: #64748b; margin-top: 3rem; font-style: italic;}
+</style>
+""", unsafe_allow_html=True)
 
-# Sidebar
-with st.sidebar:
-    st.header("Kerakli bo‘limni tanlang")
-    option = st.selectbox("Bo‘lim", [
-        "Umumiy qoidalar",
-        "6 ta usul (302-modda)",
-        "1-usul: Bitim qiymati (303–308)",
-        "2-usul: Aynan bir xil tovar (309)",
-        "3-usul: O‘xshash tovar (310)",
-        "4-usul: Chegirib tashlash (311)",
-        "5-usul: Qo‘shish (312)",
-        "6-usul: Zaxira usul (313)",
-        "Qo‘shiladigan xarajatlar (304)",
-        "Chiqarib tashlanadigan xarajatlar (305)",
-        "O‘zaro bog‘liq shaxslar (307–308)",
-        "Bojxona qiymati deklaratsiyasi (318)",
-        "Nazorat va tuzatish (319–321)"
-    ])
+# ==================== SIDEBAR NAVIGATSIYA ====================
+st.sidebar.image("https://customs.uz/local/templates/main/images/logo.png", width=200)
+st.sidebar.title("🛃 BQD Taqdimoti")
+st.sidebar.markdown("**O‘zbekiston Respublikasi bojxona qonunchiligiga asoslangan**")
+st.sidebar.markdown("---")
 
-# Ma'lumotlar bazasi
-data = {
-    "Umumiy qoidalar": """
-    **301-modda**: Bojxona qiymati — bojxona to‘lovlarini hisoblash uchun asos.
-    - Asosiy usul: **bitim qiymati** (303-modda)
-    - Barcha usullar WTO VII moddasiga mos
-    - 2024 yildan: tartib Vazirlar Mahkamasi tomonidan belgilanadi
-    """,
+slides = [
+    "Kirish",
+    "BQD Turlari",
+    "Taqdim Etish Shakllari",
+    "BQD-1 To‘ldirish (1-usul)",
+    "BQD-1: Muhim grafalar",
+    "BQD-2 To‘ldirish (2-6 usullar)",
+    "Kerakli hujjatlar",
+    "Muhim eslatmalar",
+    "Xulosa"
+]
 
-    "6 ta usul (302-modda)": """
-    **302-modda** – Olib kiriladigan tovarning bojxona qiymati quyidagi usullar **ketma-ket** qo‘llaniladi:
-    1. Bitim qiymati (asosiy)
-    2. Aynan bir xil tovar
-    3. O‘xshash tovar
-    4. Chegirib tashlash
-    5. Qo‘shish
-    6. Zaxira usul
-    
-    ⚠️ 4 va 5-usullar teskari tartibda ham qo‘llanilishi mumkin
-    """,
+if 'slide' not in st.session_state:
+    st.session_state.slide = slides[0]
 
-    "1-usul: Bitim qiymati (303–308)": """
-    **303-modda**: Bitim qiymati — tovar bojxona chegarasidan o‘tayotganda **haqiqatda to‘langan yoki to‘lanadigan narx** (tuzatilgandan keyin).
-    
-    **306-modda**: Bitim qiymatidan foydalanish TAQIQLANADI agar:
-    - Sotuvchi/sotib oluvchi o‘zaro bog‘liq shaxslar bo‘lsa va buni isbotlamasa
-    - Tovardan foydalanishga cheklovlar bo‘lsa
-    - Bitim narxi shartlarga bog‘liq bo‘lsa
-    - Keyinchalik sotuvdan tushum sotuvchiga qaytsa (tuzatish mumkin bo‘lmasa)
-    """,
+current_slide = st.sidebar.radio("Bo‘limni tanlang:", slides, index=slides.index(st.session_state.slide))
 
-    "2-usul: Aynan bir xil tovar (309)": """
-    Aynan bir xil tovar:
-    - Fizik xususiyat, sifat, bozor qadri bir xil
-    - Ayni ishlab chiqaruvchi, ayni mamlakat
-    - O‘zbekistonda loyihalashtirilgan bo‘lmasin
-    - 90 kun ichida olib kirilgan bo‘lsin
-    → Eng past narx tanlanadi
-    """,
+# ==================== ASOSIY KONTENT ====================
+if current_slide == "Kirish":
+    st.markdown('<p class="main-title">🛃 Bojxona Qiymat Deklaratsiyasi (BQD)</p>', unsafe_allow_html=True)
+    st.markdown('<p class="subtitle">O‘zbekiston Respublikasiga olib kiriladigan tovarlar uchun majburiy hujjat</p>', unsafe_allow_html=True)
 
-    "3-usul: O‘xshash tovar (310)": """
-    O‘xshash tovar:
-    - Har jihatdan bir xil bo‘lmasa ham, bir xil vazifani bajaradigan, tijoriy o‘rnini bosa oladigan
-    - Ayni mamlakat, afzal ayni ishlab chiqaruvchi
-    - 90 kun ichida olib kirilgan
-    → 309-moddaning qoidalari qo‘llaniladi
-    """,
+    col1, col2 = st.columns([2,1])
+    with col1:
+        st.markdown('<div class="info-box blue-box">', unsafe_allow_html=True)
+        st.markdown("### Rasmiy ta’rif (Bojxona kodeksi, 303-modda)")
+        st.write("""
+        **BQD** – bojxona yuk deklaratsiyasining (BYD) ajralmas qismi bo‘lib, unda olib kirilayotgan tovarning bojxona qiymati to‘g‘risidagi ma’lumotlar ko‘rsatiladi va deklarant (yoki bojxona brokeri) tomonidan BYD bilan bir vaqtda bojxona organiga taqdim etiladi.
+        """)
+        st.markdown("**Qonuniy asos:** O‘zbekiston Respublikasi Bojxona kodeksi (03.11.2021 y., № O‘RQ-727)")
+        st.markdown("**Normativ hujjat:** IMF vaziri 03.11.2025 y. 298-son buyrug‘i bilan tasdiqlangan yangi shakllar")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    "4-usul: Chegirib tashlash (311)": """
-    Ichki bozorda sotilgan narxdan chegirib tashlanadi:
-    - Vositchi komissiyasi + foyda
-    - Bojxona to‘lovlari va soliqlar
-    - O‘zbekistondagi transport, yuklash xarajatlari
-    → Birinchi tijorat bosqichi (importdan keyingi birinchi sotuv)
-    """,
+    with col2:
+        st.markdown('<div class="info-box green-box">', unsafe_allow_html=True)
+        st.markdown("#### BQD-1")
+        st.success("**1-usul** – Bitim qiymati usuli")
+        st.markdown("#### BQD-2")
+        st.success("**2-6 usullar** – Alternativ usullar")
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    "5-usul: Qo‘shish (312)": """
-    Ishlab chiqaruvchining xarajatlari + foyda:
-    - Materiallar + ishlab chiqarish xarajatlari
-    - Ayni mamlakatdagi odatiy foyda va umumiy xarajatlar
-    - Yetkazib berish xarajatlari (304-a band)
-    """,
+    st.info("90%+ hollarda 1-usul (BQD-1) qo‘llaniladi")
 
-    "6-usul: Zaxira usul (313)": """
-    Barcha oldingi usullar ishlamasa → qat’iy cheklovlar bilan:
-    ✅ Ruxsat etiladi: jahon narxlari, statistik ma’lumotlar, qayishqoqlik
-    ❌ TAQIQLANADI:
-    - O‘zbekistonda ishlab chiqarilgan tovar narxi
-    - Eng yuqori narxni tanlash tizimi
-    - Eksport mamlakat ichki bozor narxi
-    - O‘zboshimchalik bilan belgilangan narx
-    """,
+# ==================== BQD TURLARI ====================
+elif current_slide == "BQD Turlari":
+    st.markdown('<p class="main-title">BQD Turlari va Qo‘llanilish Ierarxiyasi</p>', unsafe_allow_html=True)
+    st.markdown("**Bojxona kodeksi 304–310-moddalar, GATT VI moddasi asosida**")
 
-    "Qo‘shiladigan xarajatlar (304)": """
-    Bitim narxiga qo‘shiladi (agar kiritilmagan bo‘lsa):
-    a) Tashish, yuklash, sug‘urta (bojxonagacha)
-    b) Konteyner, o‘rov-joylash
-    v) Bepul/arzonlashtirilgan yordam (qoliplar, dizayn, xom ashyo)
-    g) Litsenziya va royaltilar (agar sotish sharti bo‘lsa)
-    d) Keyinchalik sotuvdan sotuvchiga tushadigan daromad
-    """,
-
-    "Chiqarib tashlanadigan xarajatlar (305)": """
-    Bitim narxidan chiqarib tashlanadi (agar ajratilgan bo‘lsa):
-    - O‘rnatish, montaj, texxizmat (bojxonadan keyin)
-    - O‘zbekistondan keyingi transport
-    - O‘zbekistonda to‘lanadigan bojxona to‘lovlari (agar sotuvchi to‘lasa)
-    """,
-
-    "O‘zaro bog‘liq shaxslar (307–308)": """
-    Agar sotuvchi va xaridor o‘zaro bog‘liq bo‘lsa (307-modda: 8 ta belgi):
-    → Bitim qiymati qabul qilinadi faqat deklarant **narx ta’sir qilinmaganini isbotlasa**
-    Isbot usullari (308-modda):
-    - O‘zaro bog‘liq bo‘lmaganlarga sotilgan narx bilan solishtirish
-    - 4 yoki 5-usul bo‘yicha hisoblangan qiymat bilan yaqinlik
-    """,
-
-    "Bojxona qiymati deklaratsiyasi (318)": """
-    Bojxona qiymati deklaratsiyasi (BQD) to‘ldiriladi:
-    - Har bir bojxona to‘lovi undiriladigan tovar uchun
-    Majburiy emas agar:
-    - Umumiy qiymati ≤ 1 000 USD
-    - Bojxona to‘lovlaridan ozod
-    - Tranzit, ombor, yo‘q qilish rejimlari
-    """,
-
-    "Nazorat va tuzatish (319–321)": """
-    Bojxona organi nazorat qiladi va rad etishi mumkin agar:
-    - Hujjatlar yetishmasa yoki noto‘g‘ri bo‘lsa
-    → Shartli chiqarib berish (321-modda) – 60 kun ichida to‘liq hujjat taqdim etilmasa, bojxona qiymati uzil-kesil qabul qilinadi
-    """
-}
-
-# Asosiy kontent
-if option in data:
-    st.markdown(data[option])
-
-# Interaktiv kalkulyator – 1-usul (Bitim qiymati)
-if option == "1-usul: Bitim qiymati (303–308)":
-    st.markdown("### 🧮 Bitim qiymati bo‘yicha hisob-kitob (1-usul)")
-    
     col1, col2 = st.columns(2)
     with col1:
-        bitim_narxi = st.number_input("Bitim narxi (kontraktdagi narx, USD)", min_value=0.0, value=10000.0)
-        transport = st.number_input("Transport + yuklash + sug‘urta (bojxonagacha)", min_value=0.0, value=800.0)
-        litsenziya = st.number_input("Litsenziya/royalti (agar bo‘lsa)", min_value=0.0, value=0.0)
-        yordam = st.number_input("Bepul/arzon yordam (qoliplar, dizayn va h.k.)", min_value=0.0, value=0.0)
-    
+        st.markdown('<div class="info-box green-box">', unsafe_allow_html=True)
+        st.markdown("### BQD-1 – 1-usul (Bitim qiymati)")
+        st.markdown("""
+        - Sotuvchi va xaridor o‘rtasida haqiqiy savdo bitimi mavjud  
+        - Narx hujjatlar bilan tasdiqlangan  
+        - Hech qanday cheklov va o‘zaro bog‘liqlik narxga ta’sir qilmagan  
+        - Eng keng tarqalgan usul (90–95%)
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
     with col2:
-        st.write("Chiqarib tashlanadiganlar:")
-        ortiqcha_transport = st.number_input("O‘zbekistondan keyingi transport", min_value=0.0, value=0.0)
-        montaj = st.number_input("O‘rnatish/montaj xarajatlari", min_value=0.0, value=0.0)
+        st.markdown('<div class="info-box purple-box">', unsafe_allow_html=True)
+        st.markdown("### BQD-2 – 2-6 usullar (ketma-ketlikda)")
+        st.markdown("""
+        2. Aynan bir xil tovarlar bitimi  
+        3. O‘xshash tovarlar bitimi  
+        4. Chegirish usuli (ichki bozorda sotish narxi)  
+        5. Qo‘shish usuli (hisoblangan qiymat)  
+        6. Zaxira usul (moslashuvchan)
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
 
-    natija = bitim_narxi + transport + litsenziya + yordam - ortiqcha_transport - montaj
-    
-    st.success(f"### 💰 Bojxona qiymati (1-usul): **{natija:,.2f} USD**")
-    st.info("⚠️ Agar sotuvchi va xaridor o‘zaro bog‘liq bo‘lsa — alohida isbot talab qilinadi!")
+# ==================== TAQDIM SHAKLLARI ====================
+elif current_slide == "Taqdim Etish Shakllari":
+    st.markdown('<p class="main-title">Taqdim Etish Shakllari</p>', unsafe_allow_html=True)
 
-# Footer
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown('<div class="info-box blue-box">', unsafe_allow_html=True)
+        st.markdown("### Elektron shakl (asosiysi)")
+        st.markdown("""
+        - **TEDAAT** yagona elektron tizimi orqali  
+        - Elektron raqamli imzo (ERI) majburiy  
+        - BYD elektron bo‘lsa → BQD ham elektron  
+        - Tezkor, xatosiz, arxivlanadi
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<div class="info-box orange-box">', unsafe_allow_html=True)
+        st.markdown("### Qog‘oz shakl (istisno)")
+        st.markdown("""
+        - A4 formatda 4 nusxa  
+        - Har bir nusxada ERI va muhr  
+        - Faqat texnik uzilishlarda ruxsat etiladi
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# ==================== BQD-1 TO‘LDIRISH ====================
+elif current_slide == "BQD-1 To‘ldirish (1-usul)":
+    st.markdown('<p class="main-title">BQD-1 To‘ldirish Tartibi</p>', unsafe_allow_html=True)
+    st.markdown("**2025-yil 298-son buyruq bilan tasdiqlangan yangi shakl**")
+
+    with st.expander("A bo‘lim – Asosiy bitim qiymati", expanded=True):
+        st.markdown("""
+        - **11a** → Invoys summasi (kontrakt valyutasida)  
+        - **11b** → Bilvosita to‘lovlar (royalti, vositachilik va h.k.)  
+        - **12** → Jami A bo‘lim (11a + 11b)
+        """)
+
+    with st.expander("B bo‘lim – Qo‘shimcha hisoblar (+ qo‘shiladi)"):
+        st.markdown("""
+        13–17 grafalar:  
+        - Vositachilik, konteyner, xom ashyo, litsenziya  
+        - Tashish, yuklash/tushirish, sug‘urta (yetkazib berish shartiga qarab)  
+        - Qayta sotishdan tushum ulushi  
+        → **18-grafa** = B bo‘lim yig‘indisi
+        """)
+
+    with st.expander("V bo‘lim – Chegirmalar (– chegiriladi)"):
+        st.markdown("""
+        - O‘zbekiston hududida qilingan xarajatlar  
+        - Ichki transport, bojxona to‘lovlari, montaj va h.k.  
+        → **22-grafa** = V bo‘lim yig‘indisi
+        """)
+
+    st.markdown('<div class="info-box purple-box">', unsafe_allow_html=True)
+    st.markdown("### Yakuniy formula (23a-grafa)")
+    st.markdown('<p class="formula"><strong>BOJXONA QIYMATI = (12 + 18) − 22</strong></p>', unsafe_allow_html=True)
+    st.markdown("**Valyuta kursi:** BYD qabul qilingan kunidagi Markaziy bank kursi")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# ==================== MUHIM GRAFALAR ====================
+elif current_slide == "BQD-1: Muhim grafalar":
+    st.markdown('<p class="main-title">BQD-1: Eng muhim va tanqidiy grafalar</p>', unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown('<div class="info-box red-box">', unsafe_allow_html=True)
+        st.error("**7a-7b: O‘zaro bog‘liqlik mavjudmi?**")
+        st.markdown("""
+        Agar HA bo‘lsa → narxga ta’sir qilganligini isbotlash kerak  
+        Agar ta’sir qilgan bo‘lsa → 1-usul qo‘llanilmaydi → BQD-2
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="info-box yellow-box">', unsafe_allow_html=True)
+        st.warning("**8a-8b: Cheklovlar yoki shartlar bormi?**")
+        st.markdown("- Miqdoriy baholash imkonsiz bo‘lsa → 1-usul yo‘q")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<div class="info-box orange-box">', unsafe_allow_html=True)
+        st.markdown("**9a-9b: Intellektual mulk va royaltilar**")
+        st.markdown("- Litsenziya, patent, savdo belgisi to‘lovlari → qo‘shiladi")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+        st.markdown('<div class="info-box blue-box">', unsafe_allow_html=True)
+        st.markdown("**3-grafa: Yetkazib berish shartlari**")
+        st.info("EXW | FCA | CPT | CIP | DAP | DDP → tashish va sug‘urta qo‘shiladi\n\n"
+                "FOB | CFR | CIF → faqat sug‘urta qo‘shiladi")
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# ==================== BQD-2 ====================
+elif current_slide == "BQD-2 To‘ldirish (2-6 usullar)":
+    st.markdown('<p class="main-title">BQD-2: 2-6 usullar</p>', unsafe_allow_html=True)
+
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["2-usul", "3-usul", "4-usul", "5-usul", "6-usul"])
+
+    with tab1:
+        st.markdown("### 2-usul: Aynan bir xil tovar")
+        st.info("So‘nggi 90 kun ichida 1-usulda qabul qilingan BYD raqami talab qilinadi")
+
+    with tab2:
+        st.markdown("### 3-usul: O‘xshash tovar")
+        st.info("Bir xil mamlakat, bir xil sifat, bir xil foydalanish")
+
+    with tab3:
+        st.markdown("### 4-usul: Chegirish usuli")
+        st.info("O‘zbekistonda dastlabki holatda sotilgan narxdan boshlab chegiriladi")
+
+    with tab4:
+        st.markdown("### 5-usul: Qo‘shish usuli")
+        st.error("Ishlab chiqaruvchi buxgalteriya hisobotlari talab qilinadi")
+
+    with tab5:
+        st.markdown("### 6-usul: Zaxira usul")
+        st.success("Yuqoridagi usullarning moslashuvchan kombinatsiyasi")
+
+# ==================== HUJJATLAR ====================
+elif current_slide == "Kerakli hujjatlar":
+    st.markdown('<p class="main-title">Taqdim etilishi shart bo‘lgan hujjatlar</p>', unsafe_allow_html=True)
+
+    st.markdown("### 1-usul uchun majburiy hujjatlar")
+    st.success("""
+    1. Tashqi savdo kontrakti (TEDAATda ro‘yxatdan o‘tgan)  
+    2. Hisob-faktura (Commercial Invoice)  
+    3. Transport hujjatlari (CMR, Bill of Lading, h.k.)  
+    4. Sug‘urta polisi (agar CIF, CIP va h.k.)  
+    5. To‘lov hujjatlari (SWIFT, bank o‘tkazma va boshq.)
+    """)
+
+    st.markdown("### Xavfli tovarlar yoki narx past bo‘lsa qo‘shimcha:")
+    st.warning("""
+    - Jo‘natuvchi mamlakat eksport deklaratsiyasi  
+    - Prajs-list yoki kataloglar  
+    - Ishlab chiqaruvchi narx ro‘yxati
+    """)
+
+# ==================== ESLATMALAR ====================
+elif current_slide == "Muhim eslatmalar":
+    st.markdown('<p class="main-title">Diqqat! Muhim eslatmalar</p>', unsafe_allow_html=True)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.markdown('<div class="info-box red-box">', unsafe_allow_html=True)
+        st.markdown("### Qat’iy talablar")
+        st.markdown("""
+        - O‘chirish, bo‘yash bo‘lmasligi kerak  
+        - Barcha summalar so‘mda (Markaziy bank kursi bilan)  
+        - ERI majburiy  
+        - Hujjatlar rus yoki ingliz tilida (boshqa tillarda – notarial tarjima)
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+    with col2:
+        st.markdown('<div class="info-box yellow-box">', unsafe_allow_html=True)
+        st.markdown("### Muddatlar")
+        st.markdown("""
+        - 2-4 usullar → 90 kunlik tovarlar  
+        - Agar 90 kunda topilmasa → 180 kungacha ruxsat  
+        - BQD → BYD bilan bir vaqtda taqdim etiladi
+        """)
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# ==================== XULOSA ====================
+elif current_slide == "Xulosa":
+    st.markdown('<p class="main-title">Xulosa</p>', unsafe_allow_html=True)
+    st.success("BQD – bojxona to‘lovlarini to‘g‘ri hisoblash va davlat byudjetini himoyasi uchun eng muhim hujjat!")
+
+    st.markdown("### Taqdimot mualliflari:")
+    st.markdown("""
+    <div class="author">
+        <strong>Tayyorlovchilar:</strong><br>
+        Iskandarov Asilbek<br>
+        Saidov Nozimjon<br>
+        Maxamatjonov Jasurbek<br><br>
+        <em>2025-yil dekabr, Toshkent</em>
+    </div>
+    """, unsafe_allow_html=True)
+
+    st.markdown("### Foydali havolalar")
+    st.markdown("""
+    - [O‘zbekiston Respublikasi Bojxona kodeksi](https://lex.uz/docs/-3133231)  
+    - [BQD to‘ldirish tartibi (298-son buyruq)](https://lex.uz/docs/-7713685)  
+    - [Tovarning bojxona qiymatini aniqlash qoidalari](https://lex.uz/docs/-2876354)  
+    - [Davlat bojxona qo‘mitasi rasmiy sayti](https://customs.uz)
+    """)
+
+# ==================== FOOTER & NAVIGATSIYA ====================
 st.markdown("---")
-st.markdown("""
-**Ma’lumot manbai**:  
-O‘zbekiston Respublikasi Bojxona kodeksi (2024 yil 27-fevral, № O‘RQ-913-son bilan yangilangan tahrir)  
-[lex.uz → Bojxona kodeksi](https://lex.uz/docs/-7713685)
-""")
+col_prev, col_info, col_next = st.columns([1, 2, 1])
 
-st.markdown("💡 Ushbu ilova faqat ma’lumot uchun. Rasmiy hisob-kitoblar uchun bojxona brokeri yoki bojxona organi bilan maslahatlashing.")
+current_idx = slides.index(current_slide)
+
+with col_prev:
+    if current_idx > 0:
+        if st.button("Oldingi", use_container_width=True):
+            st.session_state.slide = slides[current_idx - 1]
+            st.rerun()
+
+with col_info:
+    st.markdown(f"<p style='text-align:center; color:#64748b; font-size:1.1rem;'>
+                    Sahifa {current_idx + 1} / {len(slides)}</p>", unsafe_allow_html=True)
+
+with col_next:
+    if current_idx < len(slides) - 1:
+        if st.button("Keyingi", use_container_width=True):
+            st.session_state.slide = slides[current_idx + 1]
+            st.rerun()
+
+# Sidebar qo‘shimcha
+with st.sidebar:
+    st.markdown("---")
+    st.markdown("### Qo‘llanma")
+    st.info("← → klaviatura tugmalari bilan ham boshqarishingiz mumkin")
+    st.markdown("**Yangilangan sana:** 2025-yil dekabr")
+    st.markdown("**Asos:** Bojxona kodeksi + 298-son buyruq")
+
+st.markdown("---")
+st.caption("© 2025 Iskandarov Asilbek, Saidov Nozimjon, Maxamatjonov Jasurbek | Barcha huquqlar himoyalangan")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
