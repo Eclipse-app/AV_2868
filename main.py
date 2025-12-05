@@ -1,17 +1,8 @@
-
-
-
-
-
-
-
-
-
 import streamlit as st
 
 # ==================== SAHIFA SOZLAMALARI ====================
 st.set_page_config(
-    page_title="BQD — Bojxona Qiymat Deklaratsiyasi",
+    page_title="Oʻzbekiston Respublikasi bojxona hududiga olib kiriladigan tovarlarning bojxona qiymati deklaratsiyasini toʻldirish tartibi",
     page_icon="🇺🇿",
     layout="wide",
     initial_sidebar_state="expanded"
@@ -79,15 +70,15 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ==================== SIDEBAR NAVIGATSIYA ====================
-st.sidebar.title("🇺🇿 BQD Taqdimoti")
+st.sidebar.title("BQD Taqdimoti")
 st.sidebar.markdown("**Bojxona Qiymat Deklaratsiyasi**")
 st.sidebar.markdown("---")
 
 slides = [
-    "Kirish",
+    "1-bob. Umumiy qoidalar",
     "BQD Turlari",
     "Taqdim Shakllari",
-    "BQD-1 (1-usul) – Batafsil",
+    "BQD-1 (1-usul)",
     "BQD-1 Muhim Grafalar",
     "BQD-2 (2-6 usullar)",
     "Kerakli Hujjatlar",
@@ -104,7 +95,7 @@ current_slide = st.sidebar.radio("Bo‘limni tanlang:", list(slide_dict.keys()))
 # ==================== ASOSIY KONTENT ====================
 title = slide_dict[current_slide]
 
-if title == "Kirish":
+if title == "1-bob. Umumiy qoidalar":
     st.markdown('<h1 class="main-title">Bojxona Qiymat Deklaratsiyasi (BQD)</h1>', unsafe_allow_html=True)
     st.markdown('<p class="subtitle">O‘zbekiston Respublikasi bojxona hududiga olib kiriladigan tovarlar uchun majburiy hujjat</p>', unsafe_allow_html=True)
 
@@ -115,10 +106,8 @@ if title == "Kirish":
     st.markdown("""
     <div class="card card-blue">
         <h3>📖 BQD nima?</h3>
-        <p><strong>Bojxona Qiymat Deklaratsiyasi (BQD)</strong> — Bojxona yuk deklaratsiyasining (BYD) ajralmas qismi bo‘lib, 
-        tovarning bojxona qiymati to‘g‘risidagi to‘liq ma’lumotlarni o‘z ichiga oladi. Deklarant yoki bojxona brokeri tomonidan 
-        BYD bilan bir vaqtda bojxona organiga taqdim etiladi.</p>
-        <p><strong>Qonuniy asos:</strong> O‘zbekiston Respublikasi Bojxona kodeksining <strong>303–313-moddalari</strong></p>
+        <p><strong>Bojxona Qiymat Deklaratsiyasi (BQD)</strong> — BQD — bojxona yuk deklaratsiyasining (bundan buyon matnda BYD deb yuritiladi) ajralmas qismi boʻlib, tovarning bojxona qiymati toʻgʻrisidagi maʼlumotlar koʻrsatilgan va deklarant yoki bojxona brokeri tomonidan bojxona organiga BYD bilan bir paytda topshiriladigan hujjat;</p>
+        <p><strong>Qonuniy asos:</strong> AV <strong> 2868 </strong></p>
     </div>
     """, unsafe_allow_html=True)
 
